@@ -1,0 +1,10 @@
+flask
+pypdf2
+numpy
+pandas
+tqdm
+langchain-community
+scikit-learn
+openai
+chromadb
+tiktoken
