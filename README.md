@@ -4,3 +4,6 @@ This project used Langchain, OpenAI embeddings, along with RAG for effective inf
 
 1. Have an uploads folder and templates folder.
 2. Upload index.html inside templates folder.
+
+After this
+`pip install -r requirements.txt`
