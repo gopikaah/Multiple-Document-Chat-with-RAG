@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document and Chat Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+        }
+        .documents-section {
+            width: 25%;
+            background-color: #fff;
+            border-right: 1px solid #ccc;
+            padding: 10px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .chat-section {
+            width: 75%;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #fff;
+        }
+        .chat-input {
+            display: flex;
+            border-top: 1px solid #ccc;
+            background-color: #fff;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            outline: none;
+        }
+        .chat-input button {
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .document-item {
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+        }
+        .upload-section {
+            text-align: center;
+        }
+        .upload-section input[type="file"] {
+            display: none;
+        }
+        .upload-section label {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="documents-section">
+            <div>
+                <h2>Uploaded Documents</h2>
+                <div id="document-list">
+                    <!-- Document items will be inserted here dynamically -->
+                    {% for pdf in pdf_files %}
+                        <div class="document-item">{{ pdf }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="upload-section">
+                <form id="uploadForm" action="/upload_pdf" method="POST" enctype="multipart/form-data">
+                    <input type="file" id="fileInput" name="file">
+                    <label for="fileInput">Upload PDF</label>
+                </form>
+            </div>
+        </div>
+        <div class="chat-section">
+            <div class="chat-header">Chat</div>
+            <div class="chat-messages" id="messages"></div>
+            <div class="chat-input">
+                <input type="text" id="input" placeholder="Type a message...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function() {
+            document.getElementById('uploadForm').submit();
+        });
+
+        function sendMessage() {
+    const input = document.getElementById('input');
+    const messages = document.getElementById('messages');
+    const query = input.value.trim();
+
+    if (query !== "") {
+        // Display the user's message
+        const userMessage = document.createElement('div');
+        userMessage.textContent = query;
+        userMessage.style.padding = '10px';
+        userMessage.style.margin = '5px 0';
+        userMessage.style.backgroundColor = '#e0e0e0';
+        userMessage.style.borderRadius = '5px';
+        messages.appendChild(userMessage);
+
+        // Scroll to the bottom of the messages
+        messages.scrollTop = messages.scrollHeight;
+
+        // Clear the input field
+        input.value = '';
+
+        // Send the query to the backend
+        fetch('/ask', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ query: query })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error:', data.error);
+            } else {
+                // Display the response from the backend
+                const responseMessage = document.createElement('div');
+                responseMessage.textContent = data.response;
+                responseMessage.style.padding = '10px';
+                responseMessage.style.margin = '5px 0';
+                responseMessage.style.backgroundColor = '#d1ffd1';  // Light green background for responses
+                responseMessage.style.borderRadius = '5px';
+                messages.appendChild(responseMessage);
+
+                // Scroll to the bottom of the messages
+                messages.scrollTop = messages.scrollHeight;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+}
+
+    </script>
+</body>
+</html>
